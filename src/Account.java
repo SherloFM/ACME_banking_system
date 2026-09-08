@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.List;
 
-abstract class Account implements iFilterable, iLimitEnforcer{
+abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
     String accNumber;
     double Balance;
     boolean isActive;
@@ -43,7 +44,7 @@ abstract class Account implements iFilterable, iLimitEnforcer{
     }
 
     public void addTransaction(transactionType type, double amount){
-        
+
     }
 
 

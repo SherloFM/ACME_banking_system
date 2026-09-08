@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 
-abstract class User implements iEncryptable, iLockable{
+abstract class User implements iEncryptable, iLockable, Serializable {
     String userID, encryptedPassword, name;
     Enum<Banker,Customer> role;
     int failedLoginAttempts;
@@ -29,5 +30,5 @@ abstract class User implements iEncryptable, iLockable{
         return hashed;
     }
 
-    interface
+
 }
