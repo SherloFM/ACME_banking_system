@@ -1,4 +1,5 @@
 public class SecurityManager {
+
     public String hashPassword(String rawPassword){
         return "";
     }

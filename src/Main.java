@@ -1,15 +1,48 @@
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.Scanner;
+
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+    Optional<User> currentUser = null;
+    Scanner kbd = new Scanner(System.in);
+    FileManager fileManager = new FileManager();
+    SecurityManager securityManager = new SecurityManager();
+
+    public void login(){
+        String userID,rawPassword;
+        System.out.println("Enter userID and Password");
+        userID = kbd.next();
+        rawPassword = kbd.next();
+        Optional<User> rawUser = fileManager.loadUserData(userID);
+
+        if (rawUser.isEmpty()){
+            System.out.println("User Not Found");
         }
+        if(rawUser.get().isCurrentlyLocked() == true){
+            System.out.println("Account is locked. It will unlock at " + rawUser.get().lockoutDatetime);
+        }
+
+        boolean isValid = securityManager.verifyPassword(rawPassword, rawUser.get().getEncryptedPassword());
+        if(isValid == false){
+            System.out.println("Invalid Password");
+            rawUser.get().incrementFailedAttempts();
+            if(rawUser.get().failedLoginAttempts == 3){
+                System.out.println("3 failed attempts. Come after " + rawUser.get().lockoutDatetime);
+            }
+        }else{
+            rawUser.get().resetFailedAttempts();
+            currentUser = rawUser;
+            System.out.println("Login Successful");
+        }
+
+        if (currentUser.get().getRole().equals(Role.Banker)){
+
+        }
+    }
+    public static void main(String[] args) {
     }
 }

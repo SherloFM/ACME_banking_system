@@ -9,7 +9,7 @@ public class Banker extends User{
     }
 
     @Override
-    public Enum<Banker> getRole() {
+    public Role getRole() {
         return super.getRole();
     }
 

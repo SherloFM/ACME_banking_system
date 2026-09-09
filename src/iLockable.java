@@ -3,4 +3,5 @@ public interface iLockable {
     void incrementFailedAttempts();
     void resetFailedAttempts();
 
+    boolean isCurrentlyLocked();
 }
