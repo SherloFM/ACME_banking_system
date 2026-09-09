@@ -19,37 +19,36 @@ public class FileManager {
     }
 
     public Optional<User> loadUserData(String userID){
-        Optional<User> theUser;
-        String filePath = "Users.txt";
+        String filePath = "/Users.txt";
         try(BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))){
-            while (bufferedReader.readLine() != null){
-                String[] user = bufferedReader.toString().split(",");
-                if(user[0].equals(userID)){
-                    if(user[3].equals("Banker")){
-                        System.out.println("Banker");
-                        Banker bankerUser = new Banker();
-                        return Optional.of(bankerUser);
-                    }else{
-                        System.out.println("Customer");
-                        Customer customerUser = new Customer();
-                        customerUser.toString();
-                        return Optional.of(customerUser);
-                    }
+            String line;
+            while ((line = bufferedReader.readLine()) != null){
+                if (line.startsWith(userID + ",")){
+                    return Optional.of(getRoleFromLine(userID));
                 }
-
             }
         }catch (IOException e){
             System.out.println(e);
         }
         return Optional.empty();
     }
+    private User getRoleFromLine(String line){
+        String[] userData = line.split(",");
+        Role role = userData[3].equals("Banker")? Role.Banker:Role.Customer;
+        if(role == Role.Banker){
+            return new Banker(userData[0],userData[1],userData[2],role,0,null);
+        }else {
+            return new Banker(userData[0],userData[1],userData[2],role,0,null);
+        }
+    }
+
 
     public void saveTransactionLog(String customerID, List<Transactions> transactions){
 
     }
 
-
-    public List<Transactions> loadTransactionLog(String customerID){
-
-    }
+//
+//    public List<Transactions> loadTransactionLog(String customerID){
+//
+//    }
 }

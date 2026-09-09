@@ -6,7 +6,7 @@ public class SavingsAccount extends Account{
     double interestRate;
 
     public  double calculateMonthlyInterest(){
-
+        return 0;
     }
 
 
@@ -17,20 +17,20 @@ public class SavingsAccount extends Account{
         return false;
     }
 
-    @Override
-    public List<Transaction> filterTransactions() {
-        return List.of();
-    }
-
-    @Override
-    public boolean checkLimit(Enum<transactionType> transactionTypeEnum, double requestedAmount) {
-        return false;
-    }
-
-    @Override
-    public void recordUsage(Enum<transactionType> transactionTypeEnum, double transactionAmount) {
-
-    }
+//    @Override
+//    public List<Transaction> filterTransactions() {
+//        return List.of();
+//    }
+//
+//    @Override
+//    public boolean checkLimit(Enum<transactionType> transactionTypeEnum, double requestedAmount) {
+//        return false;
+//    }
+//
+//    @Override
+//    public void recordUsage(Enum<transactionType> transactionTypeEnum, double transactionAmount) {
+//
+//    }
 
     @Override
     public void resetDailyLimitsIfNewDay() {

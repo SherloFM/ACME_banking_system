@@ -33,19 +33,20 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
     public boolean transfer(Account target, double amount){
         boolean isSuccess = false;
 
+        return isSuccess;
     }
 
     public String generalStatement(){
         return Balance + transactions.toString();
     }
 
-    abstract boolean applyOverdraftRules(double requestedAmount){
+    boolean applyOverdraftRules(double requestedAmount){
         return true;
     }
-
-    public void addTransaction(transactionType type, double amount){
-
-    }
+//
+//    public void addTransaction(transactionType type, double amount){
+//
+//    }
 
 
 }

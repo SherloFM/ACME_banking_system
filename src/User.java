@@ -16,11 +16,27 @@ abstract class User implements iEncryptable, iLockable, Serializable {
     protected int failedLoginAttempts;
     protected LocalDateTime lockoutDatetime;
 
+    public User(String userID, String encryptedPassword, String name, Role role, int failedLoginAttempts, LocalDateTime lockoutDatetime) {
+        this.userID = userID;
+        this.encryptedPassword = encryptedPassword;
+        this.name = name;
+        this.role = role;
+        this.failedLoginAttempts = failedLoginAttempts;
+        this.lockoutDatetime = lockoutDatetime;
+    }
 
     public Role getRole() {return role;}
-    public void setRole(Role role) {this.role = role;}
     public String getEncryptedPassword() {return encryptedPassword;}
     public String getUserID() {return userID;}
+    public String getName() {return name;}
+    public LocalDateTime getLockoutDatetime() {return lockoutDatetime;}
+    public int getFailedLoginAttempts() {return failedLoginAttempts;}
+    public void setFailedLoginAttempts(int failedLoginAttempts) {this.failedLoginAttempts = failedLoginAttempts;}
+    public void setLockoutDatetime(LocalDateTime lockoutDatetime) {this.lockoutDatetime = lockoutDatetime;}
+    public void setRole(Role role) {this.role = role;}
+    public void setUserID(String userID) {this.userID = userID;}
+    public void setName(String name) {this.name = name;}
+    public void setEncryptedPassword(String encryptedPassword) {this.encryptedPassword = encryptedPassword;}
 
 
     @Override
@@ -49,8 +65,12 @@ abstract class User implements iEncryptable, iLockable, Serializable {
     @Override
     public boolean isCurrentlyLocked(){
         boolean isLocked = false;
+        if(lockoutDatetime == null){
+            return isLocked;
+        }
         if (lockoutDatetime.isAfter(LocalDateTime.now())){
             isLocked = true;
+            return isLocked;
         }
 
         return isLocked;

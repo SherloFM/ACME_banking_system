@@ -1,13 +1,19 @@
 import javax.swing.text.html.Option;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public class Customer extends User{
-    List<Account> accounts;
+
+
     double totalOverdraftFeesOwed;
 
+    public Customer(String userID, String encryptedPassword, String name, Role role, int failedLoginAttempts, LocalDateTime lockoutDatetime) {
+        super(userID, encryptedPassword, name, role, failedLoginAttempts, lockoutDatetime);
+    }
+
     public void addAccount(Account newAcc){
-        accounts.add(newAcc);
+
     }
 
     public Optional<Account> getAccNumber(String accNumber){

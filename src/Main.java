@@ -7,10 +7,9 @@ import java.util.Scanner;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
 
-    Optional<User> currentUser = null;
+    Optional<User> currentUser = Optional.empty();
     Scanner kbd = new Scanner(System.in);
     FileManager fileManager = new FileManager();
-    SecurityManager securityManager = new SecurityManager();
 
     public void login(){
         String userID,rawPassword;
@@ -21,17 +20,18 @@ public class Main {
 
         if (rawUser.isEmpty()){
             System.out.println("User Not Found");
+            return;
         }
         if(rawUser.get().isCurrentlyLocked() == true){
-            System.out.println("Account is locked. It will unlock at " + rawUser.get().lockoutDatetime);
+            System.out.println("Account is locked. It will unlock at " + rawUser.get().getLockoutDatetime());
         }
 
-        boolean isValid = securityManager.verifyPassword(rawPassword, rawUser.get().getEncryptedPassword());
+        boolean isValid = rawUser.get().authenticate(rawPassword);
         if(isValid == false){
             System.out.println("Invalid Password");
             rawUser.get().incrementFailedAttempts();
-            if(rawUser.get().failedLoginAttempts == 3){
-                System.out.println("3 failed attempts. Come after " + rawUser.get().lockoutDatetime);
+            if(rawUser.get().getFailedLoginAttempts() == 3){
+                System.out.println("3 failed attempts. Come after " + rawUser.get().getLockoutDatetime());
             }
         }else{
             rawUser.get().resetFailedAttempts();
@@ -39,10 +39,14 @@ public class Main {
             System.out.println("Login Successful");
         }
 
-        if (currentUser.get().getRole().equals(Role.Banker)){
-
+        if (currentUser.get().getRole() == Role.Banker){
+            System.out.println("Banker");
+        }else{
+            System.out.println("Customer");
         }
     }
     public static void main(String[] args) {
+        Main main = new Main();
+        main.login();
     }
 }

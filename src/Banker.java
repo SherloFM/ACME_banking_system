@@ -1,12 +1,14 @@
 import java.lang.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Banker extends User{
     List<Customer> managedCustomers;
 
-    public Banker(List<Customer> managedCustomers) {
-        this.managedCustomers = managedCustomers;
+    public Banker(String userID, String encryptedPassword, String name, Role role, int failedLoginAttempts, LocalDateTime lockoutDatetime) {
+        super(userID, encryptedPassword, name, role, failedLoginAttempts, lockoutDatetime);
     }
+
 
     @Override
     public Role getRole() {
@@ -17,15 +19,15 @@ public class Banker extends User{
         return managedCustomers;
     }
 
-    public Customer createCustomer(String customerName, String rawPassword){
+//    public Customer createCustomer(String customerName, String rawPassword){
+//
+//    }
 
-    }
-
-    public boolean assignCardtoCustomerAcc(String customerID, String accNumber, CardType cardType){
-        boolean isSuccess = false;
-
-        return isSuccess;
-    }
+//    public boolean assignCardtoCustomerAcc(String customerID, String accNumber, CardType cardType){
+//        boolean isSuccess = false;
+//
+//        return isSuccess;
+//    }
 
     public String viewCustomerDetails(String customerID){
         String customerDetails = "";

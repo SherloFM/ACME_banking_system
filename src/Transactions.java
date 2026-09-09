@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class Transactions implements Comparable<Transactions>, Serializable {
     String transactionID;
     LocalDateTime timeStamp;
-    TransactionType type;
+//    TransactionType type;
     double amount;
     double postTransactionBalance;
 
