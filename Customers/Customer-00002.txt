@@ -1,0 +1,8 @@
+Customer ID=00002
+Customer name=sulaiman
+Account
+accNumber=00000
+balance=0.0
+isActive=true
+overdraftAccount=0
+assignedCard=null

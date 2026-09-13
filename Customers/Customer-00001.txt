@@ -1,0 +1,8 @@
+Customer ID=00001
+Customer name=Husain
+Account
+accNumber=00000
+balance=0.0
+isActive=true
+overdraftAccount=0
+assignedCard=null

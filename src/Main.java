@@ -61,7 +61,7 @@ public class Main {
     }
 
     public void startBankMenu(){
-        while (loggedin){
+        while (loggedin &&currentUser.get().getRole() == Role.Banker){
             System.out.println("What would you like to do: \n 1)add new customer \n 2)view customer \n 3)logout");
             int choice = kbd.nextInt();
             if(choice == 1){
@@ -81,7 +81,7 @@ public class Main {
                 banker.createCustomer(customerName, customerPassword,accountType,cardType);
             }
             if(choice ==2){
-
+                System.out.println(banker.getManagedCustomers());
             }
             if(choice == 3){
                 logout();

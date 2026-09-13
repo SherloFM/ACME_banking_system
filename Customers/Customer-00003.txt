@@ -1,0 +1,8 @@
+Customer ID=00003
+Customer name=Hamed
+Account
+accNumber=00001
+balance=0.0
+isActive=true
+overdraftAccount=0
+assignedCard=null

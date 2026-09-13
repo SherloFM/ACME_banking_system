@@ -21,7 +21,8 @@ public class Banker extends User{
     }
 
     public List<Customer> getManagedCustomers() {
-        return managedCustomers;
+        loadManagedCustomers();
+        return managedCustomers.stream().toList();
     }
 
     public Customer createCustomer(String customerName, String rawPassword, AccountType accType, CardType cardType){
@@ -48,20 +49,34 @@ public class Banker extends User{
                 throw new IllegalArgumentException("Invalid Account Type");
         }
 
+        String cardNumber = fileManager.generateCardNumber();
         switch (cardType){
             case Platinum:
-                mastercard = new Platinum();
-
-
+                mastercard = new PlatinumCard(cardNumber);
+                break;
+            case Titanium:
+                mastercard = new TitaniumCard(cardNumber);
+                break;
+            case Standard:
+                mastercard = new StandardCard(cardNumber);
+                break;
+            default:
+                throw new IllegalArgumentException("Wrong Card Type");
         }
         account.setAccountType(accType);
         customer.addAccount(account);
-        System.out.println(managedCustomers.toString());
         fileManager.saveUserData(customer);
         fileManager.saveCustomerData(customer);
+        fileManager.saveCustomerAccount(customerID,accNumber,cardNumber);
         return customer;
     }
 
+    public void loadManagedCustomers(){
+        FileManager fileManager = new FileManager();
+        managedCustomers.clear();
+
+        managedCustomers.addAll(fileManager.loadManagedCustomer(this.userID));
+    }
 
 
 

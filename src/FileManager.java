@@ -25,11 +25,10 @@ public class FileManager {
         }
     }
     public void saveCustomerData(Customer customer){
-        String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\Customers\\Customer-"
+        String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
                 + customer.getUserID() + ".txt";
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))){
-            writer.newLine();
             writer.write("Customer ID=" + customer.getUserID());
             writer.newLine();
             writer.write("Customer name="+ customer.getName());
@@ -50,7 +49,7 @@ public class FileManager {
                 writer.write("overdraftAccount=" + account.overdraftAccount);
                 writer.newLine();
 
-                writer.write("assignedCard=" + account.assignedCard);
+                writer.write("assignedCard=" +(account.assignedCard == null ? "null" : account.assignedCard.getCardNumber()));
                 writer.newLine();
                 for (Transactions transactions: account.getTransactions()){
                     writer.write(transactions.toFileString());
@@ -64,6 +63,7 @@ public class FileManager {
 
 
     public void addCustomerToBanker(String bankerID,String customerID){
+        loadBankerCustomer();
         if(!bankerCustomer.containsKey(bankerID)){
             bankerCustomer.put(bankerID,new ArrayList<>());
         }
@@ -111,6 +111,24 @@ public class FileManager {
         }
     }
 
+    public List<Customer> loadManagedCustomer(String bankerID){
+            loadBankerCustomer();
+            List<Customer> customers = new ArrayList<>();
+
+            if(!bankerCustomer.containsKey(bankerID)){
+                return customers;
+            }
+
+            for(String customerID: bankerCustomer.get(bankerID)){
+                Optional<User> user =  loadUserData(customerID);
+                if(user.isPresent()&&user.get() instanceof Customer){
+                    customers.add((Customer) user.get());
+                }
+            }
+
+            return customers;
+    }
+
     public void saveBankerData(Banker banker){
 
     }
@@ -138,39 +156,72 @@ public class FileManager {
         return String.format("%05d", nextID);
     }
 
-    public String generateAccNumber(){
-        String fielpath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers";
+    public String generateCardNumber() {
+        String fielpath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
 
-        File directory = new File(fielpath);
+        long highestNumber = 0;
 
-        int highestID = 0;
-
-        File[] customerFiles = directory.listFiles();
-
-        if(customerFiles == null){
-            return "00001";
-        }
-
-        for (File customerfile: customerFiles){
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(customerfile))){
+        try (BufferedReader reader = new BufferedReader(new FileReader(fielpath))){
             String line;
             while ((line = reader.readLine()) != null){
-                String accountNumber = line.substring("accNumber".length());
-                int currentID = Integer.parseInt(accountNumber);
-                if(currentID>highestID){
-                    highestID = currentID;
+                String[] userData = line.split(",");
+                long currentNumber = Long.parseLong(userData[0]);
+                if (currentNumber > highestNumber){
+                    highestNumber = currentNumber;
                 }
             }
+        } catch (FileNotFoundException e) {
+            return "0000000000000001";
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        return String.format("%016d", highestNumber);
+    }
+
+    public String generateAccNumber(){
+        String fielpath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
+
+        int highestAccNumber = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fielpath))){
+            String line;
+            while ((line = reader.readLine()) != null){
+
+                String[] userData = line.split(",");
+
+                int currentAccNumber = Integer.parseInt(userData[1]);
+
+                if (currentAccNumber > highestAccNumber){
+                    highestAccNumber = currentAccNumber;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            return "00001";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
+        return String.format("%05d", highestAccNumber+1);
+    }
 
-        int nextID = highestID+1;
+    public void saveCustomerAccount(String customerID, String accountNumber, String cardNumber) {
 
-        return String.format("%05d", nextID);
+        String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath, true))) {
+
+            writer.write(
+                    customerID + "," +
+                            accountNumber + "," +
+                            cardNumber
+            );
+
+            writer.newLine();
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
     public Optional<User> loadUserData(String userID){
@@ -193,7 +244,7 @@ public class FileManager {
         if(role == Role.Banker){
             return new Banker(userData[0],userData[1],userData[2],role,0,null);
         }else {
-            return new Banker(userData[0],userData[1],userData[2],role,0,null);
+            return new Customer(userData[0],userData[1],userData[2],role,0,null);
         }
     }
 

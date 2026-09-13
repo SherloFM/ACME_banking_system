@@ -13,6 +13,10 @@ abstract class Mastercard implements iLimitEnforcer{
     LocalDate lastResetDate;
     CardType type;
 
+    public Mastercard(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
     public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
     }
@@ -49,11 +53,6 @@ abstract class Mastercard implements iLimitEnforcer{
         this.type = type;
     }
 
-    public Mastercard(CardType type, Map<Transactions, Double> dailyLimits, String cardNumber) {
-        this.type = type;
-        this.dailyLimits = dailyLimits;
-        this.cardNumber = cardNumber;
-    }
 
     public String getCardNumber() {
         return cardNumber;
