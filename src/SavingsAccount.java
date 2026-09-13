@@ -5,6 +5,10 @@ public class SavingsAccount extends Account{
 
     double interestRate;
 
+    public SavingsAccount(String accNumber, double balance, boolean isActive, int overdraftAccount) {
+        super(accNumber, balance, isActive, overdraftAccount);
+    }
+
     public  double calculateMonthlyInterest(){
         return 0;
     }

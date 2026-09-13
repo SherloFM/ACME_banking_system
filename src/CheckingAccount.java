@@ -3,15 +3,19 @@ import java.util.List;
 public class CheckingAccount extends Account{
 
 
-//    @Override
-//    public boolean checkLimit(Enum<transactionType> transactionTypeEnum, double requestedAmount) {
-//        return false;
-//    }
-//
-//    @Override
-//    public void recordUsage(Enum<transactionType> transactionTypeEnum, double transactionAmount) {
-//
-//    }
+    public CheckingAccount(String accNumber, double balance, boolean isActive, int overdraftAccount) {
+        super(accNumber, balance, isActive, overdraftAccount);
+    }
+
+
+    public boolean checkLimit(Enum<TransactionType> transactionTypeEnum, double requestedAmount) {
+        return false;
+    }
+
+
+    public void recordUsage(Enum<TransactionType> transactionTypeEnum, double transactionAmount) {
+
+    }
 
     @Override
     public void resetDailyLimitsIfNewDay() {

@@ -11,7 +11,8 @@ enum Role{
 }
 
 abstract class User implements iEncryptable, iLockable, Serializable {
-    protected String userID, encryptedPassword, name;
+    protected String userID;
+    protected String encryptedPassword, name;
     protected Role role;
     protected int failedLoginAttempts;
     protected LocalDateTime lockoutDatetime;
@@ -79,7 +80,8 @@ abstract class User implements iEncryptable, iLockable, Serializable {
     @Override
     public void incrementFailedAttempts() {
         this.failedLoginAttempts++;
-        if(failedLoginAttempts >= 3){
+        System.out.println(this.failedLoginAttempts);
+        if(this.failedLoginAttempts >= 3){
             this.lockoutDatetime = LocalDateTime.now().plusMinutes(1);
         }
     }
