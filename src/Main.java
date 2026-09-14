@@ -56,13 +56,16 @@ public class Main {
         }
     }
 
+    public void withdrawBanker(Account customerAcc, double amount){
+        customerAcc.withdraw(amount);
+    }
     public void logout(){
         login();
     }
 
     public void startBankMenu(){
         while (loggedin &&currentUser.get().getRole() == Role.Banker){
-            System.out.println("What would you like to do: \n 1)add new customer \n 2)view customer \n 3)logout");
+            System.out.println("What would you like to do: \n 1)add new customer \n 2)view customer \n 3)Perform Transaction \n 4)Logout");
             int choice = kbd.nextInt();
             if(choice == 1){
                 System.out.println("Add new customer portal");
@@ -84,6 +87,29 @@ public class Main {
                 System.out.println(banker.getManagedCustomers());
             }
             if(choice == 3){
+                System.out.println("Which transaction would you like to perform? \n 1)Withdraw from customer \n 2)Deposit into customer \n 3)Transfer between accounts");
+                int transactionChoice = kbd.nextInt();
+                if(transactionChoice == 1){
+                    System.out.println("Enter amount to withdraw");
+                    double amount = kbd.nextDouble();
+                    System.out.println("Enter Customer ID");
+                    String customerID = kbd.next();
+                    System.out.println("Enter Customer Account number");
+                    String accNumber = kbd.next();
+                    banker.withdrawFromUser(customerID, accNumber,amount);
+
+
+                }
+                if(transactionChoice == 2){
+
+                }
+                if(transactionChoice == 3){
+
+                }
+                if(transactionChoice == 4){
+
+                }
+            }if(choice == 4){
                 logout();
             }
         }

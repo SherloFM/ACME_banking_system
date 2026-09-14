@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.util.*;
 
 public class FileManager {
-    String bankDirectory, customer_Directory;
     HashMap<String, List<String>> bankerCustomer = new HashMap<>();
 
     public void saveUserData(Customer customer){
@@ -24,40 +23,21 @@ public class FileManager {
             System.out.println(e);;
         }
     }
-    public void saveCustomerData(Customer customer){
-        String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
-                + customer.getUserID() + ".txt";
+    public void createTransactionFile(String customerID) {
 
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))){
-            writer.write("Customer ID=" + customer.getUserID());
-            writer.newLine();
-            writer.write("Customer name="+ customer.getName());
-            writer.newLine();
-            for(Account account: customer.getAccounts()){
-                writer.write("Account");
-                writer.newLine();
+        String filepath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
 
-                writer.write("accNumber=" + account.accNumber);
-                writer.newLine();
+        try {
+            File file = new File(filepath);
 
-                writer.write("balance=" + account.Balance);
-                writer.newLine();
-
-                writer.write("isActive=" + account.isActive);
-                writer.newLine();
-
-                writer.write("overdraftAccount=" + account.overdraftAccount);
-                writer.newLine();
-
-                writer.write("assignedCard=" +(account.assignedCard == null ? "null" : account.assignedCard.getCardNumber()));
-                writer.newLine();
-                for (Transactions transactions: account.getTransactions()){
-                    writer.write(transactions.toFileString());
-                    writer.newLine();
-                }
+            if (!file.exists()) {
+                file.createNewFile();
             }
-        }catch (IOException e){
-            System.out.println(e);;
+
+        } catch (IOException e) {
+            System.out.println(e);
         }
     }
 
@@ -165,7 +145,7 @@ public class FileManager {
             String line;
             while ((line = reader.readLine()) != null){
                 String[] userData = line.split(",");
-                long currentNumber = Long.parseLong(userData[0]);
+                long currentNumber = Long.parseLong(userData[6]);
                 if (currentNumber > highestNumber){
                     highestNumber = currentNumber;
                 }
@@ -176,7 +156,7 @@ public class FileManager {
             throw new RuntimeException(e);
         }
 
-        return String.format("%016d", highestNumber);
+        return String.format("%016d", highestNumber+1);
     }
 
     public String generateAccNumber(){
@@ -205,15 +185,28 @@ public class FileManager {
         return String.format("%05d", highestAccNumber+1);
     }
 
-    public void saveCustomerAccount(String customerID, String accountNumber, String cardNumber) {
+    public void saveCustomerAccount(
+            String customerID,
+            String accountNumber,
+            AccountType accountType,
+            double balance,
+            boolean isActive,
+            int overdraftAccount,
+            String cardNumber) {
 
-        String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
+        String filepath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath, true))) {
+        try (BufferedWriter writer =
+                     new BufferedWriter(new FileWriter(filepath, true))) {
 
             writer.write(
                     customerID + "," +
                             accountNumber + "," +
+                            accountType + "," +
+                            balance + "," +
+                            isActive + "," +
+                            overdraftAccount + "," +
                             cardNumber
             );
 
@@ -248,13 +241,130 @@ public class FileManager {
         }
     }
 
+    public Optional<Account> loadAccount(String customerID, String accNumber) {
 
-    public void saveTransactionLog(String customerID, List<Transactions> transactions){
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
 
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                String storedCustomerID = data[0];
+                String accountNumber = data[1];
+                String accountType = data[2];
+                double balance = Double.parseDouble(data[3]);
+                boolean isActive = Boolean.parseBoolean(data[4]);
+                int overdraftAccount = Integer.parseInt(data[5]);
+                String cardNumber = data[6];
+
+                if (storedCustomerID.equals(customerID)
+                        && accountNumber.equals(accNumber)) {
+
+                    Account account;
+
+                    if (accountType.equals("Checking")) {
+                        account = new CheckingAccount(
+                                accountNumber,
+                                balance,
+                                isActive,
+                                overdraftAccount
+                        );
+                    } else {
+                        account = new SavingsAccount(
+                                accountNumber,
+                                balance,
+                                isActive,
+                                overdraftAccount
+                        );
+                    }
+
+                    return Optional.of(account);
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        return Optional.empty();
     }
 
-//
-//    public List<Transactions> loadTransactionLog(String customerID){
-//
-//    }
+    public void updateAccBalance(
+            String customerID,
+            String accNumber,
+            double newBalance) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
+
+        List<String> lines = new ArrayList<>();
+
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+            return;
+        }
+
+        for (int i = 0; i < lines.size(); i++) {
+
+            String[] data = lines.get(i).split(",");
+
+            String storedCustomerID = data[0];
+            String storedAccountNumber = data[1];
+
+            if (storedCustomerID.equals(customerID)
+                    && storedAccountNumber.equals(accNumber)) {
+
+                data[3] = String.valueOf(newBalance);
+
+                lines.set(i, String.join(",", data));
+
+                break;
+            }
+        }
+
+        try (BufferedWriter writer =
+                     new BufferedWriter(new FileWriter(filePath))) {
+
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+    public void saveTransaction(String customerID, Transactions transaction) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+        try (BufferedWriter writer =
+                     new BufferedWriter(new FileWriter(filePath, true))) {
+
+            writer.write(transaction.toFileString());
+            writer.newLine();
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
 }

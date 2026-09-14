@@ -1,10 +1,12 @@
 import javax.print.attribute.standard.ColorSupported;
 import javax.smartcardio.Card;
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.lang.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Banker extends User{
     List<Customer> managedCustomers = new ArrayList<>();
@@ -66,8 +68,7 @@ public class Banker extends User{
         account.setAccountType(accType);
         customer.addAccount(account);
         fileManager.saveUserData(customer);
-        fileManager.saveCustomerData(customer);
-        fileManager.saveCustomerAccount(customerID,accNumber,cardNumber);
+        fileManager.saveCustomerAccount(customerID, accNumber, accType, 0, true,0,cardNumber );
         return customer;
     }
 
@@ -78,6 +79,36 @@ public class Banker extends User{
         managedCustomers.addAll(fileManager.loadManagedCustomer(this.userID));
     }
 
+    public void withdrawFromUser(String customerID, String accNumber, double amount){
+        FileManager fileManager = new FileManager();
+        Optional<Account> accountOptional = fileManager.loadAccount(customerID, accNumber);
+
+        if(accountOptional.isEmpty()){
+            System.out.println("Invalid Account");
+            return;
+        }
+
+        Account account = accountOptional.get();
+
+        if (!account.withdraw(amount)) {
+            System.out.println("withdraw failed");
+            return;
+        }
+
+        Transactions transactions = new Transactions(
+                "0",
+                LocalDateTime.now(),
+                TransactionType.Withdraw,
+                amount, account.getBalance()
+        );
+        double balance = account.getBalance();
+        balance -= amount;
+        fileManager.updateAccBalance(customerID,accNumber,balance);
+        fileManager.saveTransaction(customerID, transactions);
+        System.out.println("withdraw done");
+        System.out.println("new balance" + account.getBalance());
+
+    }
 
 
 //    public boolean assignCardtoCustomerAcc(String customerID, String accNumber, CardType cardType){

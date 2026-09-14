@@ -90,15 +90,13 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
     }
 
     public boolean withdraw(double amount){
-
-        boolean isSuccess = false;
-
-        if(amount>0 && amount<Balance){
-            Balance -= amount;
-            isSuccess = true;
+        double balance = getBalance();
+        if(amount>balance || amount<0){
+            return false;
         }
-
-        return isSuccess;
+        balance -= amount;
+        setBalance(balance);
+        return true;
     }
 
     public boolean transfer(Account target, double amount){
