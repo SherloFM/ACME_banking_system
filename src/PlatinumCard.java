@@ -16,6 +16,10 @@ public class PlatinumCard extends Mastercard{
 
     }
 
+    @Override
+    public double getWithdrawLimit() {
+        return withdrawLimit;
+    }
 
     @Override
     public void resetDailyLimitsIfNewDay() {

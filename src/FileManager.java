@@ -1,7 +1,10 @@
+import javax.smartcardio.Card;
 import javax.swing.text.html.Option;
 import java.io.*;
 import java.nio.file.NoSuchFileException;
 import java.security.MessageDigest;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class FileManager {
@@ -11,11 +14,13 @@ public class FileManager {
         String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\Users.txt";
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(filepath,true))){
+
             writer.write(
                     customer.getUserID() +","+
                             customer.getEncryptedPassword() +","+
                             customer.getName()+","+
                             customer.getRole()
+
             );
 
             writer.newLine();
@@ -56,7 +61,6 @@ public class FileManager {
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))){
             for(String bankerID: bankerCustomer.keySet()){
-                writer.newLine();
                 writer.write(bankerID);
                 for (String customerID: bankerCustomer.get(bankerID)){
                     writer.write(","+customerID);
@@ -145,7 +149,7 @@ public class FileManager {
             String line;
             while ((line = reader.readLine()) != null){
                 String[] userData = line.split(",");
-                long currentNumber = Long.parseLong(userData[6]);
+                long currentNumber = Long.parseLong(userData[7]);
                 if (currentNumber > highestNumber){
                     highestNumber = currentNumber;
                 }
@@ -185,6 +189,41 @@ public class FileManager {
         return String.format("%05d", highestAccNumber+1);
     }
 
+    public String generateTransactionID(String customerID) {
+
+        String filepath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+        int highestTransactionID = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] transactionData = line.split(",");
+
+                int currentTransactionID = Integer.parseInt(transactionData[0]);
+
+                if (currentTransactionID > highestTransactionID) {
+                    highestTransactionID = currentTransactionID;
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+
+            // Customer has no transaction file yet
+            return "00001";
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return String.format("%05d", highestTransactionID + 1);
+    }
+
     public void saveCustomerAccount(
             String customerID,
             String accountNumber,
@@ -192,14 +231,15 @@ public class FileManager {
             double balance,
             boolean isActive,
             int overdraftAccount,
-            String cardNumber) {
+            String cardNumber,
+            CardType cardType
+            ) {
 
         String filepath =
                 "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
 
         try (BufferedWriter writer =
                      new BufferedWriter(new FileWriter(filepath, true))) {
-
             writer.write(
                     customerID + "," +
                             accountNumber + "," +
@@ -207,6 +247,7 @@ public class FileManager {
                             balance + "," +
                             isActive + "," +
                             overdraftAccount + "," +
+                            cardType+","+
                             cardNumber
             );
 
@@ -230,6 +271,66 @@ public class FileManager {
             System.out.println(e);
         }
         return Optional.empty();
+    }
+
+    public void loadCustomerAccounts(Customer customer){
+        String filepath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filepath))){
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null){
+
+            String[] customerAccounts = line.split(",");
+            String customerID = customerAccounts[0];
+            if (!customerID.equals(customer.getUserID())){
+                System.out.println("Invalid Customer ID");
+                return;
+            }
+
+                String accountNumber = customerAccounts[1];
+                AccountType accountType = AccountType.valueOf(customerAccounts[2]);
+                double balance = Double.parseDouble(customerAccounts[3]);
+                boolean isActive = Boolean.parseBoolean(customerAccounts[4]);
+                int overdraftAccount = Integer.parseInt(customerAccounts[5]);
+
+                CardType cardType = CardType.valueOf(customerAccounts[6]);
+                String cardNumber = customerAccounts[7];
+
+                Account account;
+
+                if(accountType == AccountType.Checking){
+                    account = new CheckingAccount(
+                            accountNumber,
+                            balance,
+                            isActive,
+                            overdraftAccount
+                    );
+                }else{
+                    account = new SavingsAccount(
+                            accountNumber,
+                            balance,
+                            isActive,
+                            overdraftAccount
+                    );
+                }
+
+                Mastercard mastercard;
+
+                switch (cardType){
+                    case Platinum -> mastercard = new PlatinumCard(cardNumber);
+                    case Titanium -> mastercard = new TitaniumCard(cardNumber);
+                    case Standard -> mastercard = new StandardCard(cardNumber);
+                    default -> throw new IllegalArgumentException("Invalid Input");
+                }
+
+                account.setAssignedCard(mastercard);
+                customer.addAccount(account);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     private User getRoleFromLine(String line){
         String[] userData = line.split(",");
@@ -255,34 +356,67 @@ public class FileManager {
 
                 String[] data = line.split(",");
 
-                String storedCustomerID = data[0];
-                String accountNumber = data[1];
-                String accountType = data[2];
-                double balance = Double.parseDouble(data[3]);
-                boolean isActive = Boolean.parseBoolean(data[4]);
-                int overdraftAccount = Integer.parseInt(data[5]);
-                String cardNumber = data[6];
+                if (data.length < 8) {
+                    continue;
+                }
+
+                String storedCustomerID = data[0].trim();
+                String accountNumber = data[1].trim();
+                AccountType accountType = AccountType.valueOf(data[2].trim());
+                double balance = Double.parseDouble(data[3].trim());
+                boolean isActive = Boolean.parseBoolean(data[4].trim());
+                int overdraftAccount = Integer.parseInt(data[5].trim());
+                CardType cardType = CardType.valueOf(data[6].trim());
+                String cardNumber = data[7].trim();
 
                 if (storedCustomerID.equals(customerID)
                         && accountNumber.equals(accNumber)) {
 
                     Account account;
 
-                    if (accountType.equals("Checking")) {
+                    if (accountType == AccountType.Checking) {
+
                         account = new CheckingAccount(
                                 accountNumber,
                                 balance,
                                 isActive,
                                 overdraftAccount
                         );
-                    } else {
+
+                    } else if (accountType == AccountType.Saving) {
+
                         account = new SavingsAccount(
                                 accountNumber,
                                 balance,
                                 isActive,
                                 overdraftAccount
                         );
+
+                    } else {
+                        System.out.println("Invalid account type");
+                        return Optional.empty();
                     }
+
+                    Mastercard card;
+
+                    if (cardType == CardType.Platinum) {
+
+                        card = new PlatinumCard(cardNumber);
+
+                    } else if (cardType == CardType.Titanium) {
+
+                        card = new TitaniumCard(cardNumber);
+
+                    } else if (cardType == CardType.Standard) {
+
+                        card = new StandardCard(cardNumber);
+
+                    } else {
+                        System.out.println("Invalid card type");
+                        return Optional.empty();
+                    }
+
+                    account.setAssignedCard(card);
 
                     return Optional.of(account);
                 }
@@ -290,6 +424,8 @@ public class FileManager {
 
         } catch (IOException e) {
             System.out.println(e);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid data in CustomerAccounts.txt: " + e.getMessage());
         }
 
         return Optional.empty();
@@ -367,4 +503,49 @@ public class FileManager {
         }
     }
 
+    public double getTodayWithdrawals(String customerID, String accNumber) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+
+
+        double totalWithdrawn = 0;
+
+        LocalDate today = LocalDate.now();
+
+        File file = new File(filePath);
+        if(!file.exists()){
+            createTransactionFile(customerID);
+        }
+
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                String transactionAccount = data[1];
+                LocalDateTime timestamp = LocalDateTime.parse(data[2]);
+                String transactionType = data[3];
+                double amount = Double.parseDouble(data[4]);
+
+                if (transactionAccount.equals(accNumber)
+                        && transactionType.equals("Withdraw")
+                        && timestamp.toLocalDate().equals(today)) {
+
+                    totalWithdrawn += amount;
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        return totalWithdrawn;
+    }
 }

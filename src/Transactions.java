@@ -11,10 +11,16 @@ enum TransactionType{
 public class Transactions implements Comparable<Transactions>, Serializable {
     String transactionID;
     LocalDateTime timeStamp;
+    String accountNumber;
     TransactionType type;
 
-    public Transactions(String transactionID, LocalDateTime timeStamp, TransactionType type, double amount, double postTransactionBalance) {
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public Transactions(String transactionID, String accountNumber, LocalDateTime timeStamp, TransactionType type, double amount, double postTransactionBalance) {
         this.transactionID = transactionID;
+        this.accountNumber = accountNumber;
         this.timeStamp = timeStamp;
         this.type = type;
         this.amount = amount;
@@ -52,6 +58,7 @@ public class Transactions implements Comparable<Transactions>, Serializable {
     public String toFileString(){
 
         return transactionID + ","+
+                accountNumber+","+
                 timeStamp + ","+
                 type+ "," +
                 amount+ "," +

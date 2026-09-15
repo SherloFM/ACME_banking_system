@@ -9,6 +9,7 @@ public class Main {
 
     Optional<User> currentUser = Optional.empty();
     Banker banker;
+    Customer customer;
     Scanner kbd = new Scanner(System.in);
     FileManager fileManager = new FileManager();
     boolean loggedin = false;
@@ -48,6 +49,21 @@ public class Main {
                     startBankMenu();
                 } else {
                     System.out.println("Customer");
+                    customer = (Customer) currentUser.get();
+                    fileManager.loadCustomerAccounts(customer);
+                    while (loggedin &&currentUser.get().getRole() == Role.Customer) {
+                        System.out.println("What would you like to do: \n 1)Withdraw \n 2)deposit \n 3)transfer \n 4)Logout");
+                        int choice = kbd.nextInt();
+                        if(choice == 1){
+                            System.out.println("Enter Amount");
+                            double amount = kbd.nextDouble();
+                            System.out.println("Enter Acc Number");
+                            String accNumber = kbd.next();
+
+                            customer.withdraw(amount,accNumber);
+                        }
+                    }
+
                 }
                 System.out.println("Login Successful");
                 return;

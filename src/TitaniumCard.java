@@ -17,4 +17,9 @@ public class TitaniumCard extends Mastercard{
     public void resetDailyLimitsIfNewDay() {
 
     }
+
+    @Override
+    public double getWithdrawLimit() {
+        return withdrawLimit;
+    }
 }

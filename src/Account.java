@@ -15,6 +15,8 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
     Mastercard assignedCard;
     AccountType accountType;
 
+
+
     public Account(String accNumber, double balance, boolean isActive, int overdraftAccount) {
         this.accNumber = accNumber;
         Balance = balance;
@@ -94,6 +96,7 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
         if(amount>balance || amount<0){
             return false;
         }
+
         balance -= amount;
         setBalance(balance);
         return true;
@@ -104,6 +107,8 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
 
         return isSuccess;
     }
+
+
 
     public String generalStatement(){
         return Balance + transactions.toString();

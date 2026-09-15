@@ -21,9 +21,7 @@ abstract class Mastercard implements iLimitEnforcer{
         this.cardNumber = cardNumber;
     }
 
-    public Map<Transactions, Double> getDailyLimits() {
-        return dailyLimits;
-    }
+    public abstract double getWithdrawLimit();
 
     public void setDailyLimits(Map<Transactions, Double> dailyLimits) {
         this.dailyLimits = dailyLimits;
