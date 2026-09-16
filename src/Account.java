@@ -83,12 +83,14 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
     List<Transactions> transactions = new ArrayList<>();
 
     public boolean deposit(double amount){
-        boolean isSuccess = false;
-        if(amount>0){
-            Balance += amount;
-            isSuccess = true;
+        double balance = getBalance();
+        if(amount<0){
+            return false;
         }
-        return isSuccess;
+
+        balance += amount;
+        setBalance(balance);
+        return true;
     }
 
     public boolean withdraw(double amount){
@@ -102,7 +104,7 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
         return true;
     }
 
-    public boolean transfer(Account target, double amount){
+    public boolean transfer(Account sender,Account target, double amount){
         boolean isSuccess = false;
 
         return isSuccess;

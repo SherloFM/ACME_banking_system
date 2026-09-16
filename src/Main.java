@@ -1,3 +1,4 @@
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -51,19 +52,7 @@ public class Main {
                     System.out.println("Customer");
                     customer = (Customer) currentUser.get();
                     fileManager.loadCustomerAccounts(customer);
-                    while (loggedin &&currentUser.get().getRole() == Role.Customer) {
-                        System.out.println("What would you like to do: \n 1)Withdraw \n 2)deposit \n 3)transfer \n 4)Logout");
-                        int choice = kbd.nextInt();
-                        if(choice == 1){
-                            System.out.println("Enter Amount");
-                            double amount = kbd.nextDouble();
-                            System.out.println("Enter Acc Number");
-                            String accNumber = kbd.next();
-
-                            customer.withdraw(amount,accNumber);
-                        }
-                    }
-
+                    startCustomerMenu();
                 }
                 System.out.println("Login Successful");
                 return;
@@ -78,7 +67,43 @@ public class Main {
     public void logout(){
         login();
     }
+    public void startCustomerMenu(){
+        while (loggedin &&currentUser.get().getRole() == Role.Customer) {
+            System.out.println("What would you like to do: \n 1)Withdraw \n 2)deposit \n 3)transfer \n 4)Logout");
+            int choice = kbd.nextInt();
+            if(choice == 1){
+                System.out.println("Enter Amount");
+                double amount = kbd.nextDouble();
+                System.out.println("Enter Acc Number");
+                String accNumber = kbd.next();
+                customer.withdraw(amount,accNumber);
+            }
+            if (choice == 2){
+                System.out.println("1) deposit into own account/s \n 2) deposit into other account");
+                int depositchoice = kbd.nextInt();
+                if (depositchoice == 1) {
+                    System.out.println("Enter Amount");
+                    double amount = kbd.nextDouble();
+                    System.out.println("Enter Acc Number");
+                    String accNumber = kbd.next();
+                    customer.depositToPersonal(amount, accNumber);
+                }
+                if (depositchoice == 2){
+                    System.out.println("Enter Customer ID");
+                    String targetCustomerID = kbd.next();
+                    System.out.println("Enter Target Acc Number");
+                    String accNumber = kbd.next();
+                    System.out.println("Enter Amount");
+                    double amount = kbd.nextDouble();
+                    customer.deposittoOtherUser(targetCustomerID,accNumber, amount);
+                }
+            }
 
+            if(choice == 4){
+                logout();
+            }
+        }
+    }
     public void startBankMenu(){
         while (loggedin &&currentUser.get().getRole() == Role.Banker){
             System.out.println("What would you like to do: \n 1)add new customer \n 2)view customer \n 3)Perform Transaction \n 4)Logout");
@@ -88,16 +113,37 @@ public class Main {
                 String customerName, customerPassword;
                 AccountType accountType;
                 CardType cardType;
+
+
+                System.out.println("Enter CPR number");
+                String cpr = kbd.next();
+                if(!customer.isValidCPR(cpr)){
+                    System.out.println("Invalid CPR");
+                    continue;
+                }
+
+                Optional<Customer> existingCustomer = fileManager.findUserByCPR(cpr);
+                if(existingCustomer.isPresent()){
+                    customerName = existingCustomer.get().getName();
+
+                    System.out.println("Existing customer found.");
+                    System.out.println("Customer Name: " + customerName);
+                    System.out.println(
+                            "UserID: " + existingCustomer.get().getUserID());
+                    customerPassword = null;
+                }else{
                 System.out.println("Enter customer name");
                 customerName = kbd.next();
                 System.out.println("Enter Password");
                 customerPassword = kbd.next();
+
+                }
+
                 System.out.println("Enter Account Type");
                 accountType = AccountType.valueOf(kbd.next());
                 System.out.println("Enter Card Type");
                 cardType = CardType.valueOf(kbd.next());
-
-                banker.createCustomer(customerName, customerPassword,accountType,cardType);
+                banker.createCustomer(customerName, customerPassword,accountType,cardType, cpr);
             }
             if(choice ==2){
                 System.out.println(banker.getManagedCustomers());
@@ -113,11 +159,29 @@ public class Main {
                     System.out.println("Enter Customer Account number");
                     String accNumber = kbd.next();
                     banker.withdrawFromUser(customerID, accNumber,amount);
-
-
                 }
                 if(transactionChoice == 2){
+                    System.out.println("1) deposit into own account \n 2) deposit into other accounts");
+                    int depositChoice = kbd.nextInt();
+                    if(depositChoice == 1){
+                        System.out.println("Enter amount to deposit");
+                        double amount = kbd.nextDouble();
+                        System.out.println("Enter Customer ID");
+                        String customerID = kbd.next();
+                        System.out.println("Enter Customer Account number");
+                        String accNumber = kbd.next();
+                        banker.deposittoCurrentUser(customerID, accNumber,amount);
+                    }
+                    if (depositChoice == 2){
+                        System.out.println("Enter amount to deposit");
+                        double amount = kbd.nextDouble();
+                        System.out.println("Enter Customer ID");
+                        String customerID = kbd.next();
+                        System.out.println("Enter Customer Account number");
+                        String accNumber = kbd.next();
+                        banker.deposittoOtherCustmer(customerID, accNumber,amount);
 
+                    }
                 }
                 if(transactionChoice == 3){
 

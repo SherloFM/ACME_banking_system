@@ -22,4 +22,19 @@ public class TitaniumCard extends Mastercard{
     public double getWithdrawLimit() {
         return withdrawLimit;
     }
+
+    @Override
+    public double getDepositLimit() {
+        return depositLimit;
+    }
+
+    @Override
+    public double getTransferLimit() {
+        return transferLimit;
+    }
+
+    @Override
+    public double getOwnDepositLimit() {
+        return ownDepositLimit;
+    }
 }

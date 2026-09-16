@@ -25,4 +25,19 @@ public class PlatinumCard extends Mastercard{
     public void resetDailyLimitsIfNewDay() {
 
     }
+
+    @Override
+    public double getDepositLimit() {
+        return depositLimit;
+    }
+
+    @Override
+    public double getTransferLimit() {
+        return ownTransferLimit;
+    }
+
+    @Override
+    public double getOwnDepositLimit() {
+        return ownDepositLimit;
+    }
 }

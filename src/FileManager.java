@@ -19,7 +19,8 @@ public class FileManager {
                     customer.getUserID() +","+
                             customer.getEncryptedPassword() +","+
                             customer.getName()+","+
-                            customer.getRole()
+                            customer.getRole()+","+
+                            customer.getCPR()
 
             );
 
@@ -232,7 +233,8 @@ public class FileManager {
             boolean isActive,
             int overdraftAccount,
             String cardNumber,
-            CardType cardType
+            CardType cardType,
+            String CPR
             ) {
 
         String filepath =
@@ -256,6 +258,41 @@ public class FileManager {
         } catch (IOException e) {
             System.out.println(e);
         }
+    }
+
+    public Optional<Customer> findUserByCPR(String CPR){
+        String filePath = "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\Users.txt";
+        try(BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))){
+            String line;
+            while ((line = bufferedReader.readLine()) != null){
+                String[] userData = line.split(",");
+                if(userData.length<5){
+                    continue;
+                }
+                String userID = userData[0].trim();
+                String encryptedPassword = userData[1].trim();
+                String storedName = userData[2].trim();
+                Role role = Role.valueOf(userData[3].trim());
+                String storedCPR = userData[4].trim();
+
+                if(storedCPR.equals(CPR)){
+                    Customer customer = new Customer(
+                            userID,
+                            encryptedPassword,
+                            storedName,
+                            role,
+                            0,
+                            null,
+                            storedCPR
+                    );
+
+                    return Optional.of(customer);
+                }
+            }
+        }catch (IOException e){
+            System.out.println(e);
+        }
+        return Optional.empty();
     }
 
     public Optional<User> loadUserData(String userID){
@@ -297,6 +334,7 @@ public class FileManager {
                 CardType cardType = CardType.valueOf(customerAccounts[6]);
                 String cardNumber = customerAccounts[7];
 
+
                 Account account;
 
                 if(accountType == AccountType.Checking){
@@ -336,9 +374,9 @@ public class FileManager {
         String[] userData = line.split(",");
         Role role = userData[3].equals("Banker")? Role.Banker:Role.Customer;
         if(role == Role.Banker){
-            return new Banker(userData[0],userData[1],userData[2],role,0,null);
+            return new Banker(userData[0],userData[1],userData[2],role,0,null,userData[4]);
         }else {
-            return new Customer(userData[0],userData[1],userData[2],role,0,null);
+            return new Customer(userData[0],userData[1],userData[2],role,0,null,userData[4]);
         }
     }
 
@@ -547,5 +585,50 @@ public class FileManager {
         }
 
         return totalWithdrawn;
+    }
+    public double getTodayDeposits(String customerID, String accNumber) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+
+
+        double totalDeposited = 0;
+
+        LocalDate today = LocalDate.now();
+
+        File file = new File(filePath);
+        if(!file.exists()){
+            createTransactionFile(customerID);
+        }
+
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                String transactionAccount = data[1];
+                LocalDateTime timestamp = LocalDateTime.parse(data[2]);
+                String transactionType = data[3];
+                double amount = Double.parseDouble(data[4]);
+
+                if (transactionAccount.equals(accNumber)
+                        && transactionType.equals("Deposit")
+                        && timestamp.toLocalDate().equals(today)) {
+
+                    totalDeposited += amount;
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        return totalDeposited;
     }
 }

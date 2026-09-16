@@ -8,7 +8,6 @@ enum CardType{
 }
 abstract class Mastercard implements iLimitEnforcer{
     String cardNumber;
-    Map<Transactions,Double> dailyLimits;
     Map<Transactions,Double> dailyUsage;
     LocalDate lastResetDate;
     CardType type;
@@ -23,9 +22,11 @@ abstract class Mastercard implements iLimitEnforcer{
 
     public abstract double getWithdrawLimit();
 
-    public void setDailyLimits(Map<Transactions, Double> dailyLimits) {
-        this.dailyLimits = dailyLimits;
-    }
+    public abstract double getDepositLimit();
+
+    public abstract double getOwnDepositLimit();
+
+    public abstract double getTransferLimit();
 
     public Map<Transactions, Double> getDailyUsage() {
         return dailyUsage;

@@ -16,14 +16,24 @@ abstract class User implements iEncryptable, iLockable, Serializable {
     protected Role role;
     protected int failedLoginAttempts;
     protected LocalDateTime lockoutDatetime;
+    String CPR;
 
-    public User(String userID, String encryptedPassword, String name, Role role, int failedLoginAttempts, LocalDateTime lockoutDatetime) {
+    public User(String userID, String encryptedPassword, String name, Role role, int failedLoginAttempts, LocalDateTime lockoutDatetime, String cpr) {
         this.userID = userID;
         this.encryptedPassword = encryptedPassword;
         this.name = name;
         this.role = role;
         this.failedLoginAttempts = failedLoginAttempts;
         this.lockoutDatetime = lockoutDatetime;
+        this.CPR = cpr;
+    }
+
+    public String getCPR() {
+        return CPR;
+    }
+
+    public void setCPR(String CPR) {
+        this.CPR = CPR;
     }
 
     public Role getRole() {return role;}
@@ -91,4 +101,10 @@ abstract class User implements iEncryptable, iLockable, Serializable {
         this.failedLoginAttempts = 0;
         this.lockoutDatetime = null;
     }
+
+    public static boolean isValidCPR(String CPR){
+        return CPR != null && CPR.matches("\\d{9}");
+    }
+
+
 }
