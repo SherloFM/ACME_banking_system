@@ -631,4 +631,219 @@ public class FileManager {
 
         return totalDeposited;
     }
+    public double getTodayTransfers(String customerID, String accNumber) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+
+
+        double totalTransfered = 0;
+
+        LocalDate today = LocalDate.now();
+
+        File file = new File(filePath);
+
+        if(!file.exists()){
+            createTransactionFile(customerID);
+        }
+
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+
+
+                String[] data = line.split(",");
+
+                if (data.length<6){
+                    continue;
+                }
+                String transactionAccount = data[1];
+                LocalDateTime timestamp = LocalDateTime.parse(data[2]);
+                String transactionType = data[3];
+                double amount = Double.parseDouble(data[4]);
+
+                if (transactionAccount.equals(accNumber)
+                        && transactionType.equals("Transfer")
+                        && timestamp.toLocalDate().equals(today)) {
+
+                    totalTransfered += amount;
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        return totalTransfered;
+    }
+
+    public double getTodayOwnTransfers(
+            String customerID,
+            String accNumber) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+        double totalTransferred = 0;
+
+        LocalDate today = LocalDate.now();
+
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            createTransactionFile(customerID);
+        }
+
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                if (data.length < 6) {
+                    continue;
+                }
+
+                String transactionAccount = data[1];
+                LocalDateTime timestamp = LocalDateTime.parse(data[2]);
+                String transactionType = data[3];
+                double amount = Double.parseDouble(data[4]);
+
+                if (transactionAccount.equals(accNumber)
+                        && transactionType.equals("OwnTransfer")
+                        && timestamp.toLocalDate().equals(today)) {
+
+                    totalTransferred += amount;
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        return totalTransferred;
+    }
+
+    public void updateAccountActiveStatus(
+            String customerID,
+            String accNumber,
+            boolean active) {
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\src\\CustomerAccounts.txt";
+
+        List<String> lines = new ArrayList<>();
+
+        try (BufferedReader bufferedreader = new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+
+            while ((line = bufferedreader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                if (data.length >= 8
+                        && data[0].equals(customerID)
+                        && data[1].equals(accNumber)) {
+
+                    data[4] = String.valueOf(active);
+
+                    line = String.join(",", data);
+                }
+
+                lines.add(line);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error reading account file.");
+            return;
+        }
+
+        try (BufferedWriter bw =
+                     new BufferedWriter(new FileWriter(filePath))) {
+
+            for (String line : lines) {
+                bw.write(line);
+                bw.newLine();
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error updating account file.");
+        }
+    }
+
+    public List<Transactions> loadTransactions(String customerID) {
+
+        List<Transactions> transactions = new ArrayList<>();
+
+        String filePath =
+                "C:\\Users\\ahmed\\IdeaProjects\\ACME_banking_system\\Customers\\Customer-"
+                        + customerID + ".txt";
+
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return transactions;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                if (data.length < 6) {
+                    continue;
+                }
+
+                String transactionID = data[0];
+                String accountNumber = data[1];
+
+                LocalDateTime timeStamp =
+                        LocalDateTime.parse(data[2]);
+
+                TransactionType type =
+                        TransactionType.valueOf(data[3]);
+
+                double amount =
+                        Double.parseDouble(data[4]);
+
+                double postTransactionBalance =
+                        Double.parseDouble(data[5]);
+
+                Transactions transaction =
+                        new Transactions(
+                                transactionID,
+                                accountNumber,
+                                timeStamp,
+                                type,
+                                amount,
+                                postTransactionBalance
+                        );
+
+                transactions.add(transaction);
+            }
+
+        } catch (IOException | IllegalArgumentException e) {
+
+            System.out.println(
+                    "Error loading transactions: " +
+                            e.getMessage()
+            );
+        }
+
+        return transactions;
+    }
 }

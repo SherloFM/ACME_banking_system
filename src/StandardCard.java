@@ -38,4 +38,8 @@ public class StandardCard extends Mastercard{
         return ownDepositLimit;
     }
 
+    @Override
+    public double getOwnTransferLimit() {
+        return ownTransferLimit;
+    }
 }

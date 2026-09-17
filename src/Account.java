@@ -105,9 +105,35 @@ abstract class Account implements iFilterable, iLimitEnforcer, Serializable {
     }
 
     public boolean transfer(Account sender,Account target, double amount){
-        boolean isSuccess = false;
 
-        return isSuccess;
+        if (sender == null || target == null) {
+            return false;
+        }
+
+        if (amount <= 0) {
+            return false;
+        }
+
+        // First make sure the sender actually has enough money.
+        if (sender.getBalance() < amount) {
+            return false;
+        }
+
+        // Withdraw from sender
+        if (!sender.withdraw(amount)) {
+            return false;
+        }
+
+        // Deposit into target
+        if (!target.deposit(amount)) {
+
+            // Safety rollback if deposit somehow fails
+            sender.deposit(amount);
+
+            return false;
+        }
+
+        return true;
     }
 
 

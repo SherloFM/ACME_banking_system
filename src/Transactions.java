@@ -6,6 +6,7 @@ enum TransactionType{
     Withdraw,
     Deposit,
     Transfer,
+    OwnTransfer
 }
 
 public class Transactions implements Comparable<Transactions>, Serializable {
@@ -39,13 +40,14 @@ public class Transactions implements Comparable<Transactions>, Serializable {
         return transactionID;
     }
 
+    public TransactionType getType() {
+        return type;
+    }
+
     public LocalDateTime getTimeStamp() {
         return timeStamp;
     }
 
-    public TransactionType getType() {
-        return type;
-    }
 
     public double getAmount() {
         return amount;
@@ -62,9 +64,10 @@ public class Transactions implements Comparable<Transactions>, Serializable {
                 timeStamp + ","+
                 type+ "," +
                 amount+ "," +
-                postTransactionBalance
-                ;
+                postTransactionBalance;
     }
+
+
 
 
 }

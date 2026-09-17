@@ -28,6 +28,8 @@ abstract class Mastercard implements iLimitEnforcer{
 
     public abstract double getTransferLimit();
 
+    public abstract double getOwnTransferLimit();
+
     public Map<Transactions, Double> getDailyUsage() {
         return dailyUsage;
     }

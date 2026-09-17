@@ -17,6 +17,11 @@ public class PlatinumCard extends Mastercard{
     }
 
     @Override
+    public double getOwnTransferLimit() {
+        return ownTransferLimit;
+    }
+
+    @Override
     public double getWithdrawLimit() {
         return withdrawLimit;
     }
